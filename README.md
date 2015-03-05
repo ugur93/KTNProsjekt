@@ -1,2 +1,4 @@
 # KTNProsjekt
-Stian, Ivar, Brage, Ugur, Harald, Gruppe 101
+Gruppe 101
+Medlemmer: Stian, Ivar, Brage, Ugur, Harald
+
