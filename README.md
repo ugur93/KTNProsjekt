@@ -2,27 +2,27 @@
 Gruppe 101
 Medlemmer: Stian, Ivar, Brage, Ugur, Harald
 
-Arbeidsoppgaver:
+#Arbeidsoppgaver:
 
-Ugur:
-#Write something here
-
-
-Stian:
-#Write something here
+##Ugur:
+Write something here
 
 
-
-Harald:
-#Write something here
+##Stian:
+//Write something her
 
 
 
-Ivar:
-#Write something here
+##Harald:
+Write something here
 
 
-Brage:
-#Write something here
+
+##Ivar:
+Write something here
+
+
+##Brage:
+Write something here
 
 
