@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import socket
+import sys
+from MessageReceiver.py import MessageReceiver
 
 class Client:
     """
@@ -16,6 +18,8 @@ class Client:
         self.run()
 
         # TODO: Finish init process with necessary code
+        receiver = MessageReceiver()
+        receiver.start()
 
     def run(self):
         # Initiate the connection to the server
@@ -23,22 +27,19 @@ class Client:
 
     def disconnect(self):
         # TODO: Handle disconnection
-        pass
+        self.connection.close()
 
     def receive_message(self, message):
         # TODO: Handle incoming message
-        pass
+        print message
 
     def send_payload(self, data):
-        # TODO: Handle sending of a payload
-        pass
+        while 1:
+            message = raw_input()
+            if message == '\quit':
+                break
+            send_payload(message)
 
 
 if __name__ == '__main__':
-    """
-    This is the main method and is executed when you type "python Client.py"
-    in your terminal.
-
-    No alterations is necessary
-    """
-    client = Client('localhost', 9998)
+    client = Client(sys.argv[1], 9998)
