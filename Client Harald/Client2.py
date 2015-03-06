@@ -78,14 +78,21 @@ class Client:
         
         send_var = self.w_write.get()
         if send_var == '\quit':
-            self.root.quit()
             self.open_menu()
+        else:
+            print send_var #for debugging
+            # use json on data
+            #self.connection.send(data)
         self.w_write.delete(0, END)
-        print send_var
-        # use json on data
-        #self.connection.send(data)
 
     def open_menu(self):
+        self.w_text_frame.pack_forget()
+        self.w_write_frame.pack_forget()
+        self.w_text_scrollbar.pack_forget()
+        
+        self.w_text.pack_forget()
+        self.w_write.pack_forget()
+
         self.b_login.pack()
         self.b_logout.pack()
         self.b_names.pack()
