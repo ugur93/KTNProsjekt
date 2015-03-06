@@ -58,6 +58,10 @@ class Client:
         self.b_quit_frame.pack_propagate(False)
         self.b_quit_frame.place(x=40, y=220)
 
+        self.w_names_frame = Frame(self.root, height=300, width=200)
+        self.w_names_frame.pack_propagate(False)
+        self.w_names_frame.place(x=200, y=0)
+
         self.w_text_frame = Frame(self.root, height=280, width=400, bg='Black')
         self.w_text_frame.pack_propagate(False)
         self.w_text_scrollbar = Scrollbar(self.w_text_frame)
@@ -74,6 +78,9 @@ class Client:
         self.b_quit     = Button(self.b_quit_frame,     text='Quit'     , command=self.quit)
 
         # text fields
+        self.w_names = Text(self.w_names_frame, font=('Helvetica', 10), bg='Black', fg='Green')
+        self.w_names.insert(END, 'Click <List names> to update\n')
+
         self.w_text = Text(self.w_text_frame, font=('Helvetica', 10), bg='Black', fg='Green')
         self.w_text.config(yscrollcommand=self.w_text_scrollbar.set)
         self.w_text_scrollbar.config(command=self.w_text.yview)
@@ -105,6 +112,7 @@ class Client:
         self.b_chat.pack()
         self.b_help.pack()
         self.b_quit.pack()
+        self.w_names.pack()
 
     def login_button(self):
         self.b_login.pack_forget()
@@ -127,6 +135,7 @@ class Client:
         self.b_chat.pack_forget()
         self.b_help.pack_forget()
         self.b_quit.pack_forget()
+        self.w_names.pack_forget()
 
         self.w_text_frame.pack(side=TOP)
         self.w_write_frame.pack(side=BOTTOM)
