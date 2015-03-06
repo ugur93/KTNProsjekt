@@ -64,9 +64,6 @@ class Client:
 
         self.w_write_frame = Frame(self.root, height=20, width=400)
         self.w_write_frame.pack_propagate(False)
-
-        #self.w_login_frame = Frame(self.root, height=20, width=40)
-        #self.w_login_frame.pack_propagate(False)
         
         # buttons
         self.b_login    = Button(self.b_login_frame,    text='Log in'   , command=self.login_button)
@@ -88,7 +85,6 @@ class Client:
         self.w_login = Entry(self.b_login_frame, textvariable=self.user_name, width=400)
         self.w_login.bind('<Return>', self.login)
         self.user_name.set('username')
-
 
     def run(self):
         self.open_menu()
@@ -119,9 +115,10 @@ class Client:
         self.b_login.pack()
 
     def logout(self):
-        pass
+        self.send_payload('logout')
+
     def list_names(self):
-        pass
+        self.send_payload('names')
 
     def open_chat(self):
         self.b_login.pack_forget()
@@ -139,7 +136,8 @@ class Client:
         self.w_write.pack()
 
     def help(self):
-        pass
+        self.send_payload('help')
+
     def quit(self):
         self.disconnect()
         sys.exit()
@@ -156,7 +154,7 @@ class Client:
         if send_var == '\quit':
             self.open_menu()
         else:
-            self.send_payload(send_var)
+            self.send_payload('msg ' + send_var)
         self.w_write.delete(0, END)
 
     def send_payload(self, data):

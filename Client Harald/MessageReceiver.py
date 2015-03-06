@@ -5,15 +5,8 @@ from Client import *
 
 class MessageReceiver(Thread):
     def __init__(self, clientstr, connectionstr):
-
-        
-
         Thread.__init__(self)
-
         self.daemon = True
-        #self.start()
-
-        print 'test'
 
     def run(self):
         while(1):
