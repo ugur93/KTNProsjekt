@@ -14,22 +14,8 @@ class MessageReceiver(Thread):
         #self.start()
 
         print 'test'
-        #Client.send_payload(client, 'test')
 
     def run(self):
         while(1):
             sleep(1)
-            Client.send_payload(client, 'Hello')
-
-class writeWindow(Thread):
-    def __init__(self):
-        Thread.__init__(self)
-        self.daemon = True
-        #self.start()
-
-    def run(self):
-        while 1:
-            message = raw_input()
-            if message == '\quit':
-                quit()
-            Client.send_payload(client, message)
+            Client.receive_message(client, 'Hey you')
