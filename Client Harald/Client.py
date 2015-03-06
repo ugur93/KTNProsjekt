@@ -29,33 +29,68 @@ class Client:
         receiver.setName('receiverThread')
         receiver.start()
 
-    def run(self):
+        # the window
         self.root = Tk()
         self.root.title('KTN Chat')
         self.root.geometry('{}x{}'.format(400, 300))
-        self.send_var = StringVar()
 
-        self.b_login = Button(self.root, text='Log in', command=self.login)
-        self.b_logout = Button(self.root, text='Log out', command=self.logout)
-        self.b_names = Button(self.root, text='List names', command=self.list_names)
-        self.b_chat = Button(self.root, text='Open chat', command=self.open_chat)
-        self.b_help = Button(self.root, text='Help', command=self.help)
-        self.b_quit = Button(self.root, text='Quit', command=self.quit)
+        # user input
+        self.send_var   = StringVar()
+        self.user_name  = StringVar()
+
+        # frames
+        self.b_login_frame = Frame(self.root, height=30, width=100)
+        self.b_login_frame.pack_propagate(False)
+        self.b_login_frame.place(x=40, y=20)
+        self.b_logout_frame = Frame(self.root, height=30, width=100)
+        self.b_logout_frame.pack_propagate(False)
+        self.b_logout_frame.place(x=40, y=60)
+        self.b_names_frame = Frame(self.root, height=30, width=100)
+        self.b_names_frame.pack_propagate(False)
+        self.b_names_frame.place(x=40, y=100)
+        self.b_chat_frame = Frame(self.root, height=30, width=100)
+        self.b_chat_frame.pack_propagate(False)
+        self.b_chat_frame.place(x=40, y=140)
+        self.b_help_frame = Frame(self.root, height=30, width=100)
+        self.b_help_frame.pack_propagate(False)
+        self.b_help_frame.place(x=40, y=180)
+        self.b_quit_frame = Frame(self.root, height=30, width=100)
+        self.b_quit_frame.pack_propagate(False)
+        self.b_quit_frame.place(x=40, y=220)
 
         self.w_text_frame = Frame(self.root, height=280, width=400, bg='Black')
         self.w_text_frame.pack_propagate(False)
-        self.w_write_frame = Frame(self.root, height=20, width=400)
-        self.w_write_frame.pack_propagate(False)
         self.w_text_scrollbar = Scrollbar(self.w_text_frame)
 
-        self.w_text = Text(self.w_text_frame, font=('Helvetica', 10), bg='Black', fg='Green') #, textvariable=self.recv_var
+        self.w_write_frame = Frame(self.root, height=20, width=400)
+        self.w_write_frame.pack_propagate(False)
+
+        #self.w_login_frame = Frame(self.root, height=20, width=40)
+        #self.w_login_frame.pack_propagate(False)
+        
+        # buttons
+        self.b_login    = Button(self.b_login_frame,    text='Log in'   , command=self.login_button)
+        self.b_logout   = Button(self.b_logout_frame,   text='Log out'  , command=self.logout)
+        self.b_names    = Button(self.b_names_frame,    text='List names', command=self.list_names)
+        self.b_chat     = Button(self.b_chat_frame,     text='Open chat', command=self.open_chat)
+        self.b_help     = Button(self.b_help_frame,     text='Help'     , command=self.help)
+        self.b_quit     = Button(self.b_quit_frame,     text='Quit'     , command=self.quit)
+
+        # text fields
+        self.w_text = Text(self.w_text_frame, font=('Helvetica', 10), bg='Black', fg='Green')
         self.w_text.config(yscrollcommand=self.w_text_scrollbar.set)
         self.w_text_scrollbar.config(command=self.w_text.yview)
         self.w_text.insert(END, 'Welcome to KTN Chat\nType \quit to exit\n')
 
         self.w_write = Entry(self.w_write_frame, textvariable=self.send_var, width=400)
-        self.w_write.bind('<Return>', self.send_payload)
+        self.w_write.bind('<Return>', self.read_input)
 
+        self.w_login = Entry(self.b_login_frame, textvariable=self.user_name, width=400)
+        self.w_login.bind('<Return>', self.login)
+        self.user_name.set('username')
+
+
+    def run(self):
         self.open_menu()
 
         self.root.mainloop()
@@ -75,11 +110,17 @@ class Client:
         self.b_help.pack()
         self.b_quit.pack()
 
-    def login():
+    def login_button(self):
+        self.b_login.pack_forget()
+        self.w_login.pack()
+    def login(self, event):
+        self.send_payload('login ' + self.w_login.get())
+        self.w_login.pack_forget()
+        self.b_login.pack()
+
+    def logout(self):
         pass
-    def logout():
-        pass
-    def list_names():
+    def list_names(self):
         pass
 
     def open_chat(self):
@@ -97,9 +138,10 @@ class Client:
         self.w_text.pack()
         self.w_write.pack()
 
-    def help():
+    def help(self):
         pass
     def quit(self):
+        self.disconnect()
         sys.exit()
 
     def receive_message(self, message):
@@ -109,15 +151,18 @@ class Client:
         except:
             pass
 
-    def send_payload(self, event):
+    def read_input(self, event):
         send_var = self.w_write.get()
         if send_var == '\quit':
             self.open_menu()
         else:
-            print send_var #for debugging
-            # use json on data
-            #self.connection.send(data)
+            self.send_payload(send_var)
         self.w_write.delete(0, END)
+
+    def send_payload(self, data):
+        print data #for debugging
+        # use json on data
+        #self.connection.send(data)
 
     def disconnect(self):
         # TODO: Handle disconnection
