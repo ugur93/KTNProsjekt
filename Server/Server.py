@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import SocketServer
+from datetime import datetime
+import json
 
 
 class ClientHandler(SocketServer.BaseRequestHandler):
@@ -9,7 +11,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
     only connected clients, and not the server itself. If you want to write
     logic for the server, you must write it outside this class
     """
-
+    
     def handle(self):
         """
         This method handles the connection between a client and the server.
@@ -24,6 +26,25 @@ class ClientHandler(SocketServer.BaseRequestHandler):
             
             # TODO: Add handling of received payload from client
 
+    def sendError(self, username, error):
+        sendResponse(username, 'error', error)
+    def sendInfo(self, username, info):
+        sendResponse(username, 'info', info)
+    def sendHistory(self, username, history):
+        sendResponse(username, 'history', history)
+    def sendMessage(self, username, message):
+        sendResponse(username, 'message', message)
+
+    def sendResponse(self, username, response, content):
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        timestampLine = "'timestamp:'" + '<' currentTime + '>' + ',\n'
+        senderLine = "'sender':" + '<' + username + '>' + ',\n'
+        responseLine = "'response':" + '<' + response + '>' + ',\n'
+        contentLine = "'content':" + '<' + content + '>'
+        message = timestampLine + senderLine + responeLine + contentLine
+        data = json.dump(message)
+        self.connetion.send(data)
+        
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     """
