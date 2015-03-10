@@ -5,7 +5,7 @@ from time import sleep
 from threading import *
 from Tkinter import *
 import json
-#from MessageReceiver import *
+from MessageReceiver import *
 
 class Client:
     def __init__(self, server_IP):
@@ -14,10 +14,6 @@ class Client:
         self.server_IP      = server_IP
         self.server_port    = 9998
         self.connection.connect((self.server_IP, self.server_port))
-        
-        receiver = MessageReceiver('client', 'connection')
-        receiver.setName('receiverThread')
-        receiver.start()
 
         # the window
         self.root = Tk()
@@ -85,6 +81,10 @@ class Client:
         self.user_name.set('username')
 
     def run(self):
+        receiver = MessageReceiver(self)
+        receiver.setName('receiverThread')
+        receiver.start()
+
         self.open_menu()
 
         self.root.mainloop()
