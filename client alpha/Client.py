@@ -10,10 +10,10 @@ from MessageReceiver import *
 class Client:
     def __init__(self, server_IP):
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
         self.server_IP      = server_IP
         self.server_port    = 9998
         self.connection.connect((self.server_IP, self.server_port))
+        self.loggedin = 0
 
         # the window
         self.root = Tk()
@@ -113,28 +113,34 @@ class Client:
         self.send_payload('login', self.w_login.get())
         self.w_login.pack_forget()
         self.b_login.pack()
+        self.loggedin = 1
 
     def logout(self):
         self.send_payload('logout' ,'')
+        self.loggedin = 0
 
     def list_names(self):
         self.send_payload('names', '')
 
     def open_chat(self):
-        self.b_login.pack_forget()
-        self.b_logout.pack_forget()
-        self.b_names.pack_forget()
-        self.b_chat.pack_forget()
-        self.b_help.pack_forget()
-        self.b_quit.pack_forget()
-        self.w_names.pack_forget()
+        if self.loggedin == 0:
+            self.w_names.insert(END, 'You are not logged in' + '\n')
+            self.w_names.yview(END)
+        else:
+            self.b_login.pack_forget()
+            self.b_logout.pack_forget()
+            self.b_names.pack_forget()
+            self.b_chat.pack_forget()
+            self.b_help.pack_forget()
+            self.b_quit.pack_forget()
+            self.w_names.pack_forget()
 
-        self.w_text_frame.pack(side=TOP)
-        self.w_write_frame.pack(side=BOTTOM)
-        self.w_text_scrollbar.pack(side=RIGHT, fill=Y)
-        
-        self.w_text.pack()
-        self.w_write.pack()
+            self.w_text_frame.pack(side=TOP)
+            self.w_write_frame.pack(side=BOTTOM)
+            self.w_text_scrollbar.pack(side=RIGHT, fill=Y)
+            
+            self.w_text.pack()
+            self.w_write.pack()
 
     def help(self):
         self.send_payload('help', '')
@@ -143,10 +149,16 @@ class Client:
         self.disconnect()
         sys.exit()
 
-    def receive_message(self, message):
+    def receive_message(self, msgType, message):
         try:
-            self.w_text.insert(END, message + '\n')
-            self.w_text.yview(END)
+            if msgType == 'message' or msgType == 'history':
+                self.w_text.insert(END, message + '\n')
+                self.w_text.yview(END)
+            elif msgType == 'info' or msgType == 'error':
+                self.w_names.insert(END, message + '\n')
+                self.w_names.yview(END)
+            else:
+                print 'ERROR: receive_message got invalid msgType'
         except:
             print 'ERROR: exception in receive_message()'
 
@@ -165,7 +177,6 @@ class Client:
 
         data = json.dumps(dic)
         self.connection.send(data)
-        print data #for debugging
 
     def disconnect(self):
         self.connection.close()
