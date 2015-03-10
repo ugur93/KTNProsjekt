@@ -3,8 +3,9 @@ import SocketServer
 from datetime import datetime
 import json
 
-History={}
-Names=[]
+History=[]
+Names=[]         
+ConnectedIP=[]
 class ClientHandler(SocketServer.BaseRequestHandler):
     """
     This is the ClientHandler class. Everytime a new client connects to the
@@ -20,6 +21,8 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         self.logged_in=0
         self.username=' '
         self.ip = self.client_address[0]
+        ConnectedIP.append(self.client_address)
+        #print ConnectedIP
         self.port = self.client_address[1]
         self.connection = self.request
 
@@ -68,12 +71,14 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         if self.logged_in==1:
             self.logged_in=0
             Names.remove(self.username)
+            ConnectedIP.remove(self.client_address)
             print self.username + ' logged out'
             self.connection.shutdown(1)
             
     def handlemsgRequest(self,data):
         if self.logged_in==1:
             self.sendMessage(data)
+            print self.username + ' said: ' + data
         else:
             self.sendError('You must be logged in, you can only request login or help')
     def handleNamesRequest(self):
@@ -103,10 +108,11 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         message = {'timestamp':currentTime,'sender':self.username,'response':response,'content':content} #timestampLine + senderLine + responeLine + contentLine
         data = json.dumps(message)
         if content=='message':
-            addHistory=self.username+'currentTime'
-            History[addHistory]=data
+            addHistory=self.username+' said: '+content
+            History.append(addHistory)
         if broadcast==1:
-            self.connection.sendall(data)
+            for ipaddr in ConnectedIP:
+                self.connection.sendto(data,ipaddr)
         else:
             self.connection.send(data)
         
