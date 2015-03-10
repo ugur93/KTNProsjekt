@@ -193,7 +193,7 @@ class Client:
 if __name__ == '__main__':
     try:
         if len(sys.argv) == 1:
-            client = Client('78.91.7.129')
+            client = Client('129.241.151.35')
             client.run()
         elif len(sys.argv) == 2:
             client = Client(sys.argv[1])

@@ -15,7 +15,7 @@ class MessageReceiver(Thread):
     def run(self):
         while(1):
         	received_string = self.connect.recv(4096)
-        	if received__string:
+        	if received_string:
                     received_data=json.loads(received_string)
                     msgType = received_data['response']
                     message = received_data['content']

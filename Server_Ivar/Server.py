@@ -145,7 +145,7 @@ if __name__ == "__main__":
     No alterations is necessary
     """
     #lock=threading.Lock();
-    HOST, PORT = '78.91.21.138', 9998
+    HOST, PORT = '192.168.0.110', 9998
     print 'Server running...'
 
     # Set up and initiate the TCP server
