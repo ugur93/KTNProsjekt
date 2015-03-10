@@ -15,6 +15,7 @@ class Client:
         self.connection.connect((self.server_IP, self.server_port))
         self.loggedin = 0
 
+        ## GUI configuration and functionality
         # the window
         self.root = Tk()
         self.root.title('KTN Chat')
@@ -57,9 +58,8 @@ class Client:
 
         self.w_write_frame = Frame(self.root, height=20, width=400)
         self.w_write_frame.pack_propagate(False)
-        
-        
-        # buttons
+      
+        # buttons (command triggers)
         self.b_login    = Button(self.b_login_frame,    text='Log in'   , command=self.login_button)
         self.b_logout   = Button(self.b_logout_frame,   text='Log out'  , command=self.logout)
         self.b_names    = Button(self.b_names_frame,    text='List names', command=self.list_names)
@@ -78,7 +78,7 @@ class Client:
         self.w_text_scrollbar.config(command=self.w_text.yview)
         self.w_text.insert(END, 'Welcome to KTN Chat\n')
 
-        self.w_write = Entry(self.w_write_frame, textvariable=self.send_var, width=400)
+        self.w_write = Entry(self.w_write_frame, textvariable=self.send_var, width=400) # Chat boxes
         self.w_write.bind('<Return>', self.read_input)
 
         self.w_login = Entry(self.b_login_frame, textvariable=self.user_name, width=400)
@@ -86,9 +86,9 @@ class Client:
         self.user_name.set('username')
 
     def run(self):
-        receiver = MessageReceiver(self, self.connection)
+        receiver = MessageReceiver(self, self.connection) 
         receiver.setName('receiverThread')
-        receiver.start()
+        receiver.start() # Threaded instance of MessageReceiver
 
         self.open_menu()
 
@@ -121,10 +121,12 @@ class Client:
         self.w_login.pack_forget()
         self.b_login.pack()
         self.loggedin = 1
+        #print 'logged in ' + str(self.loggedin)
 
     def logout(self):
         self.send_payload('logout', ' ')
         self.loggedin = 0
+        #print 'logged in ' + str(self.loggedin)
 
     def list_names(self):
         self.send_payload('names', ' ')
@@ -155,8 +157,9 @@ class Client:
         self.send_payload('help', ' ')
 
     def quit(self):
-        self.disconnect()
-        sys.exit()
+        self.send_payload('msg', 'closingTCPConn') # Informing the server that the socket is about to close
+        self.connection.close()
+        sys.exit(0)
 
     def exit(self):
         self.open_menu()
@@ -180,28 +183,27 @@ class Client:
         self.w_write.delete(0, END)
 
     def send_payload(self, requestType, messageContent):
-        
-
         dic = {'request':requestType, 'content':messageContent}
-
         data = json.dumps(dic)
         self.connection.send(data)
 
-    def disconnect(self):
-        self.connection.close()
 
 if __name__ == '__main__':
     try:
         if len(sys.argv) == 1:
-            client = Client('129.241.151.35')
+            client = Client('129.241.151.35') # Default server IP
             client.run()
         elif len(sys.argv) == 2:
             client = Client(sys.argv[1])
             client.run()
         else:
             print 'use only server IP as argument'
-
+    except SystemExit as arg:
+        if arg.code == 0:
+            print 'Successful SystemExit call'
+        else:
+            print 'Unsuccessful SystemExit call with argument: ' + str(arg)
     except:
         print 'ERROR: exception in __main__'
+        print sys.exc_info()
         sys.exit()
-
