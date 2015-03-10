@@ -81,7 +81,7 @@ class Client:
         self.user_name.set('username')
 
     def run(self):
-        receiver = MessageReceiver(self)
+        receiver = MessageReceiver(self, self.connection)
         receiver.setName('receiverThread')
         receiver.start()
 
