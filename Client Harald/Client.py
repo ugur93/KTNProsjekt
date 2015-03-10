@@ -4,6 +4,7 @@ import sys
 from time import sleep
 from threading import *
 from Tkinter import *
+import json
 #from MessageReceiver import *
 
 
@@ -24,6 +25,7 @@ class Client:
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.host = host
         self.server_port = server_port
+        self.connection.connect((host, server_port))
         
         receiver = MessageReceiver('client', 'connection')
         receiver.setName('receiverThread')
@@ -118,15 +120,15 @@ class Client:
         self.b_login.pack_forget()
         self.w_login.pack()
     def login(self, event):
-        self.send_payload('login ' + self.w_login.get())
+        self.send_payload('login', self.w_login.get())
         self.w_login.pack_forget()
         self.b_login.pack()
 
     def logout(self):
-        self.send_payload('logout')
+        self.send_payload('logout' ,'')
 
     def list_names(self):
-        self.send_payload('names')
+        self.send_payload('names', '')
 
     def open_chat(self):
         self.b_login.pack_forget()
@@ -145,7 +147,7 @@ class Client:
         self.w_write.pack()
 
     def help(self):
-        self.send_payload('help')
+        self.send_payload('help', '')
 
     def quit(self):
         self.disconnect()
@@ -163,22 +165,24 @@ class Client:
         if send_var == '\quit':
             self.open_menu()
         else:
-            self.send_payload('msg ' + send_var)
+            self.send_payload('msg', send_var)
         self.w_write.delete(0, END)
 
-    def send_payload(self, data):
+    def send_payload(self, requestType, messageContent):
+        
+
+        dic = {'request':requestType, 'content':messageContent}
+
+        data = json.dumps(dic)
+        self.connection.send(data)
         print data #for debugging
-        # use json on data
-        #self.connection.send(data)
 
     def disconnect(self):
-        # TODO: Handle disconnection
-        #self.connection.close()
-        pass
+        self.connection.close()
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
-        client = Client('localhost', 9998)
+        client = Client('78.91.75.91', 9998)
         client.run()
     elif len(sys.argv) == 2:
         client = Client(sys.argv[1], 9998)
