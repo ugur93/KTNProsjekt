@@ -5,7 +5,7 @@ import json
 
 History=[]
 Names=[]         
-ConnectedIP=[]
+Sockets=[]
 class ClientHandler(SocketServer.BaseRequestHandler):
     """
     This is the ClientHandler class. Everytime a new client connects to the
@@ -21,15 +21,19 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         self.logged_in=0
         self.username=' '
         self.ip = self.client_address[0]
-        ConnectedIP.append(self.client_address)
-        #print ConnectedIP
         self.port = self.client_address[1]
         self.connection = self.request
+        Sockets.append(self.connection)
 
         # Loop that listens for messages from the client
         while True:
-            try:
-                received_string = self.connection.recv(4096)
+                try:
+                    received_string = self.connection.recv(4096)
+                except Socket.error as error:
+                     if error.errno==errno.WSAECONNRESET:
+                            print "error"
+                     Sockets.remove(self.connection)
+                     self.connection.close()
                 received_data=json.loads(received_string)
                 request=received_data['request'];
                 content=received_data['content'];
@@ -45,8 +49,8 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                      self.handleHelpRequest()
                 else:
                      self.sendError('Invalid request')
-            except ValueError:
-                    pass
+          
+                    
                    
 
             #print received_data
@@ -62,28 +66,34 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         if self.logged_in==1:
             self.sendError('You are already logged in')
         else:
-            self.logged_in=1
-            self.username=data
-            Names.append(self.username)
-            print self.username + ' logged in'
-            self.sendHistory()
+            if data in Names:
+                self.sendError('The username is already in use!')
+            else:
+                self.logged_in=1
+                self.username=data
+                Names.append(self.username)
+                print self.username + ' logged in'
+                self.sendHistory()
     def handleLogoutRequest(self):
         if self.logged_in==1:
             self.logged_in=0
             Names.remove(self.username)
-            ConnectedIP.remove(self.client_address)
+            Sockets.remove(self.connection)
             print self.username + ' logged out'
-            self.connection.shutdown(1)
+            self.connection.close()
             
     def handlemsgRequest(self,data):
         if self.logged_in==1:
-            self.sendMessage(data)
+            self.sendMessage(self.username+' said: ' + data)
             print self.username + ' said: ' + data
         else:
             self.sendError('You must be logged in, you can only request login or help')
     def handleNamesRequest(self):
         if self.logged_in==1:
-            self.sendMessage(Names)
+            Names_string='You are talking with:\n'
+            for i in Names:
+                Names_string=Names_string+i+'\n'
+            self.sendInfo(Names_string)
         else:
             self.sendError('You must be logged in, you can only request login or help')
     def handleHelpRequest(self):
@@ -95,9 +105,12 @@ class ClientHandler(SocketServer.BaseRequestHandler):
     def sendInfo(self, info):
         self.sendResponse('info', info,0)
     def sendHistory(self):
-        self.sendResponse('history',History,0)
+        History_string=' '
+        for i in History:
+            History_string=History_string+i+'\n'
+        self.sendResponse('history',History_string,0)
     def sendMessage(self, message):
-        self.sendResponse('message', message,1)
+        self.sendResponse('message',message,1)
 
     def sendResponse(self,response, content,broadcast):
         currentTime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -111,8 +124,8 @@ class ClientHandler(SocketServer.BaseRequestHandler):
             addHistory=self.username+' said: '+content
             History.append(addHistory)
         if broadcast==1:
-            for ipaddr in ConnectedIP:
-                self.connection.sendto(data,ipaddr)
+            for socket_n in Sockets:
+                socket_n.send(data)
         else:
             self.connection.send(data)
         
@@ -125,7 +138,7 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     No alterations is necessary
     """
     allow_reuse_address = True
-
+    
 if __name__ == "__main__":
     """
     This is the main method and is executed when you type "python Server.py"
