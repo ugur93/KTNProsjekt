@@ -7,25 +7,13 @@ from Tkinter import *
 import json
 #from MessageReceiver import *
 
-
-from threading import Thread
-class MessageReceiver(Thread):
-    def __init__(self, clientstr, connectionstr):
-        Thread.__init__(self)
-        self.daemon = True
-
-    def run(self):
-        while(1):
-            sleep(1)
-            Client.receive_message(client, 'Hey you')
-
-
 class Client:
-    def __init__(self, host, server_port):
+    def __init__(self, server_IP):
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.host = host
-        self.server_port = server_port
-        self.connection.connect((host, server_port))
+
+        self.server_IP      = server_IP
+        self.server_port    = 9998
+        self.connection.connect((self.server_IP, self.server_port))
         
         receiver = MessageReceiver('client', 'connection')
         receiver.setName('receiverThread')
@@ -39,24 +27,25 @@ class Client:
         # user input
         self.send_var   = StringVar()
         self.user_name  = StringVar()
+        self.server_IP  = StringVar()
 
         # frames
-        self.b_login_frame = Frame(self.root, height=30, width=100)
+        self.b_login_frame  = Frame(self.root, height=30, width=100)
         self.b_login_frame.pack_propagate(False)
         self.b_login_frame.place(x=40, y=20)
         self.b_logout_frame = Frame(self.root, height=30, width=100)
         self.b_logout_frame.pack_propagate(False)
         self.b_logout_frame.place(x=40, y=60)
-        self.b_names_frame = Frame(self.root, height=30, width=100)
+        self.b_names_frame  = Frame(self.root, height=30, width=100)
         self.b_names_frame.pack_propagate(False)
         self.b_names_frame.place(x=40, y=100)
-        self.b_chat_frame = Frame(self.root, height=30, width=100)
+        self.b_chat_frame   = Frame(self.root, height=30, width=100)
         self.b_chat_frame.pack_propagate(False)
         self.b_chat_frame.place(x=40, y=140)
-        self.b_help_frame = Frame(self.root, height=30, width=100)
+        self.b_help_frame   = Frame(self.root, height=30, width=100)
         self.b_help_frame.pack_propagate(False)
         self.b_help_frame.place(x=40, y=180)
-        self.b_quit_frame = Frame(self.root, height=30, width=100)
+        self.b_quit_frame   = Frame(self.root, height=30, width=100)
         self.b_quit_frame.pack_propagate(False)
         self.b_quit_frame.place(x=40, y=220)
 
@@ -119,6 +108,7 @@ class Client:
     def login_button(self):
         self.b_login.pack_forget()
         self.w_login.pack()
+
     def login(self, event):
         self.send_payload('login', self.w_login.get())
         self.w_login.pack_forget()
@@ -158,7 +148,7 @@ class Client:
             self.w_text.insert(END, message + '\n')
             self.w_text.yview(END)
         except:
-            pass
+            print 'ERROR: exception in receive_message()'
 
     def read_input(self, event):
         send_var = self.w_write.get()
@@ -181,13 +171,16 @@ class Client:
         self.connection.close()
 
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
-        client = Client('78.91.75.91', 9998)
-        client.run()
-    elif len(sys.argv) == 2:
-        client = Client(sys.argv[1], 9998)
-        client.run()
-    else:
-        print 'Too many input arguments'
+    try:
+        if len(sys.argv) == 1:
+            print 'use server IP as argument'
+        elif len(sys.argv) == 2:
+            client = Client(sys.argv[1])
+            client.run()
+        else:
+            print 'use only server IP as argument'
+
+    except:
+        print 'ERROR: exception in __main__'
         sys.exit()
 
