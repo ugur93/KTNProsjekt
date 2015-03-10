@@ -13,7 +13,6 @@ class ClientHandler(SocketServer.BaseRequestHandler):
     logic for the server, you must write it outside this class
     """
     
-
     def handle(self):
         """
         This method handles the connection between a client and the server.
@@ -83,7 +82,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         else:
             self.sendError('You must be logged in, you can only request login or help')
     def handleHelpRequest(self):
-        self.sendInfo()
+        self.sendInfo('No help for you')
 
 
     def sendError(self, error):
@@ -128,7 +127,7 @@ if __name__ == "__main__":
 
     No alterations is necessary
     """
-    HOST, PORT = 'localhost', 9998
+    HOST, PORT = '78.91.75.91', 9998
     print 'Server running...'
 
     # Set up and initiate the TCP server
