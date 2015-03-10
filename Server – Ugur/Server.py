@@ -2,6 +2,7 @@
 import SocketServer
 from datetime import datetime
 import json
+import time
 #import threading
 
 History=[]
@@ -26,9 +27,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         self.ip = self.client_address[0]
         self.port = self.client_address[1]
         self.connection = self.request
-        #self.lock.acquire()
         Sockets.append(self.connection)
-        #self.lock.release()
         
         # Loop that listens for messages from the client
         while True:
@@ -56,7 +55,10 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                              self.sendError('Invalid request')
                 except Exception as error:
                      print error
-                     break; 
+                     Sockets.remove(self.connection)
+                     self.sendMessage(self.username + ' logged out with error ')
+                     break;
+                time.sleep(1) 
                     
                    
 
@@ -87,6 +89,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
             Names.remove(self.username)
             Sockets.remove(self.connection)
             print self.username + ' logged out'
+            self.sendMessage(self.username + ' logged out ')
             self.connection.close()
             
     def handlemsgRequest(self,data):
