@@ -2,6 +2,7 @@
 import SocketServer
 from datetime import datetime
 import json
+#import threading
 
 History=[]
 Names=[]         
@@ -13,6 +14,8 @@ class ClientHandler(SocketServer.BaseRequestHandler):
     only connected clients, and not the server itself. If you want to write
     logic for the server, you must write it outside this class
     """
+    #def __init__(self,lock):
+
     
     def handle(self):
         """
@@ -23,33 +26,37 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         self.ip = self.client_address[0]
         self.port = self.client_address[1]
         self.connection = self.request
+        #self.lock.acquire()
         Sockets.append(self.connection)
-
+        #self.lock.release()
+        
         # Loop that listens for messages from the client
         while True:
                 try:
                     received_string = self.connection.recv(4096)
-                except Socket.error as error:
-                     if error.errno==errno.WSAECONNRESET:
-                            print "error"
-                     Sockets.remove(self.connection)
-                     self.connection.close()
-                received_data=json.loads(received_string)
-                request=received_data['request'];
-                content=received_data['content'];
-                if request=='login':
-                    self.handleLoginRequest(content)
-                elif request =='logout':
-                    self.handleLogoutRequest()
-                elif request=='msg':
-                    self.handlemsgRequest(content)
-                elif request=='names':
-                     self.handleNamesRequest()
-                elif request=='help':
-                     self.handleHelpRequest()
-                else:
-                     self.sendError('Invalid request')
-          
+                         #if error==errno.WSAECONNRESET:
+                         #       print "error"
+                         #Sockets.remove(self.connection)
+                         #self.connection.close()
+                    if len(received_string)!=0:
+                        received_data=json.loads(received_string)
+                        request=received_data['request'];
+                        content=received_data['content'];
+                        if request=='login':
+                            self.handleLoginRequest(content)
+                        elif request =='logout':
+                            self.handleLogoutRequest()
+                        elif request=='msg':
+                            self.handlemsgRequest(content)
+                        elif request=='names':
+                             self.handleNamesRequest()
+                        elif request=='help':
+                             self.handleHelpRequest()
+                        else:
+                             self.sendError('Invalid request')
+                except Exception as error:
+                     print error
+                     break; 
                     
                    
 
@@ -114,10 +121,6 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 
     def sendResponse(self,response, content,broadcast):
         currentTime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        #timestampLine = "'timestamp:'" + '<' currentTime + '>' + ',\n'
-        #senderLine = "'sender':" + '<' + username + '>' + ',\n'
-        #responseLine = "'resopnse':" + '<' + response + '>' + ',\n'
-        #contentLine = "'content':" + '<' + content + '>'
         message = {'timestamp':currentTime,'sender':self.username,'response':response,'content':content} #timestampLine + senderLine + responeLine + contentLine
         data = json.dumps(message)
         if content=='message':
@@ -125,7 +128,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
             History.append(addHistory)
         if broadcast==1:
             for socket_n in Sockets:
-                socket_n.send(data)
+                socket_n.send(data)       
         else:
             self.connection.send(data)
         
@@ -146,6 +149,7 @@ if __name__ == "__main__":
 
     No alterations is necessary
     """
+    #lock=threading.Lock();
     HOST, PORT = '78.91.75.91', 9998
     print 'Server running...'
 
